@@ -1,9 +1,9 @@
 package test
 
 import (
-	factory "github.com/zyphub/design_pattern_go/creation_factory"
-	"github.com/zyphub/design_pattern_go/creation_factory/factory_method"
-	"github.com/zyphub/design_pattern_go/creation_factory/simple"
+	factory "github.com/penk110/design_pattern_go/creation_factory"
+	"github.com/penk110/design_pattern_go/creation_factory/factory_method"
+	"github.com/penk110/design_pattern_go/creation_factory/simple"
 	"testing"
 	"time"
 )

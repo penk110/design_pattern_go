@@ -1,7 +1,7 @@
 package factory_method
 
 import (
-	factory "github.com/zyphub/design_pattern_go/creation_factory"
+	factory "github.com/penk110/design_pattern_go/creation_factory"
 	"time"
 )
 

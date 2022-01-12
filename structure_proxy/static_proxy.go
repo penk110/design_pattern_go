@@ -37,7 +37,7 @@ func NewUserProxy(user *User) *UserProxy {
 	}
 }
 
-// Login 实现收代理对象的相关方法
+// Login 实现受代理对象的相关方法
 func (p *UserProxy) Login(username, password string) error {
 	// before: validate logic
 	// eg: calculate cost time
@@ -48,7 +48,7 @@ func (p *UserProxy) Login(username, password string) error {
 		return err
 	}
 
-	// after: anther logics
+	// after: auth logics
 	log.Printf("user login cost time: %s", time.Now().Sub(start))
 
 	return nil

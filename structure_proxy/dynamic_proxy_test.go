@@ -31,8 +31,8 @@ func (p *UserProxy) Login(username string, password string) (r0 error) {
 		t.Errorf("[TestGenerate] get work directory failed, err: %s\n", err.Error())
 		return
 	}
-
 	filePath := path.Join(pwd, "static_proxy.go")
+	t.Logf("[TestGenerate] get work directory: %s", filePath)
 	out, err := generate(filePath)
 	require.Nil(t, err)
 	assert.Equal(t, want, out)
