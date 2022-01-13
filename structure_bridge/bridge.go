@@ -3,8 +3,8 @@ package structure_bridge
 import "log"
 
 /*
-
- */
+	将抽象和实现分别抽离，各自实现
+*/
 
 type MessageSenderImp interface {
 	Sender(msg string, options ...interface{}) error
