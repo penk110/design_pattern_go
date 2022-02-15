@@ -1,7 +1,7 @@
 package behavior_observer
 
 import (
-	"context"
+	"fmt"
 	"github.com/google/uuid"
 	"sync"
 	"testing"
@@ -10,25 +10,31 @@ import (
 
 func TestSubject_Notify(t *testing.T) {
 	var (
-		sub  SubjectImpl
-		ober ObserverImpl
-		err  error
+		sub      SubjectImpl
+		observer ObserverImpl
+		err      error
 	)
 	sub = &Subject{
-		mux: sync.Mutex{},
-		os:  map[string]ObserverImpl{},
+		mux:      sync.Mutex{},
+		os:       map[string]ObserverImpl{},
+		cancelCh: make(chan struct{}),
+		msgCh:    make(chan *Msg, 1024),
 	}
-	ober = &Observer{
-		id: uuid.NewString(),
-	}
-	err = sub.Register(ober)
-	if err != nil {
-		t.Errorf("err: %v", err)
+	go sub.loop()
+
+	for i := 1; i < 10; i++ {
+		observer = &Observer{
+			id: uuid.NewString(),
+		}
+		if err = sub.Register(observer); err != nil {
+			t.Errorf("err: %v", err)
+		}
+		sub.Notify(&Msg{
+			ObserverID: observer.GetID(),
+			Msg:        fmt.Sprintf("%v", i),
+		})
 	}
 
-	_ = sub.Notify(context.TODO(), &Msg{
-		ObserverID: ober.GetID(),
-		Msg:        time.Now().String(),
-	})
-	t.Log("success")
+	time.Sleep(2 * time.Second)
+	sub.Stop()
 }

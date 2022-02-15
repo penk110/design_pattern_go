@@ -1,9 +1,9 @@
 package behavior_observer
 
 import (
-	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 )
 
@@ -16,11 +16,13 @@ type SubjectImpl interface {
 	Register(observer ObserverImpl) error
 	Remove(ID string) error
 	IExist(id string) bool
-	Notify(ctx context.Context, msg *Msg) error
+	Notify(msg *Msg)
+	Stop()
+	loop()
 }
 
 type ObserverImpl interface {
-	Exec(ctx context.Context, msg *Msg)
+	Exec(msg *Msg)
 	GetID() string
 }
 
@@ -32,14 +34,15 @@ func (o *Observer) GetID() string {
 	return o.id
 }
 
-func (o *Observer) Exec(ctx context.Context, msg *Msg) {
+func (o *Observer) Exec(msg *Msg) {
 	fmt.Println("---------exec id: " + o.id + " msg: " + msg.Msg + "----------")
-	ctx.Done()
 }
 
 type Subject struct {
-	mux sync.Mutex
-	os  map[string]ObserverImpl
+	mux      sync.Mutex
+	os       map[string]ObserverImpl
+	msgCh    chan *Msg
+	cancelCh chan struct{}
 }
 
 func (s *Subject) Register(observer ObserverImpl) error {
@@ -69,10 +72,26 @@ func (s *Subject) IExist(id string) bool {
 	return true
 }
 
-func (s *Subject) Notify(ctx context.Context, msg *Msg) error {
-	if !s.IExist(msg.ObserverID) {
-		return errors.New("id: " + msg.ObserverID + " not exist.")
+func (s *Subject) Notify(msg *Msg) {
+	s.msgCh <- msg
+}
+
+func (s *Subject) loop() {
+	for {
+		select {
+		case m := <-s.msgCh:
+			go func(msg *Msg) {
+				if !s.IExist(msg.ObserverID) {
+					log.Println("id: " + msg.ObserverID + " not exist.")
+				}
+				s.os[msg.ObserverID].Exec(msg)
+			}(m)
+		case <-s.cancelCh:
+			return
+		}
 	}
-	s.os[msg.ObserverID].Exec(ctx, msg)
-	return nil
+}
+
+func (s *Subject) Stop() {
+	s.cancelCh <- struct{}{}
 }
